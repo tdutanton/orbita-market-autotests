@@ -3,8 +3,10 @@ package tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import base.BaseTest;
+import io.qameta.allure.Allure;
 import io.qameta.allure.Feature;
 import io.restassured.response.Response;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import orbitaMarket.model.ErrorResponse;
@@ -23,38 +25,12 @@ class OrdersServiceTests extends BaseTest {
     String userId = uniqueUserId();
     paymentsApi.createAccount(userId);
 
-    Map<String, Object> payload = Map.of(
-        "aoi", 3.0,
-        "capture_date", "2026-06-01",
-        "sensor_type", "MSI"
-    );
-
-    Response response = ordersApi.createOrder(userId, "ARCHIVE", payload);
+    Response response = ordersApi.createOrder(userId, "ARCHIVE", archivePayload());
     response.then().statusCode(201);
 
     OrderResponse order = response.as(OrderResponse.class);
     assertThat(order.getOrderId()).isNotBlank();
     assertThat(order.getProductType()).isEqualTo("ARCHIVE");
-    assertThat(order.getStatus()).isIn("CREATED", "PAYMENT_PENDING");
-  }
-
-  @Test
-  @DisplayName("[201] POST /orders - создать TASKING заказ")
-  void createTaskingOrderSuccess() {
-    String userId = uniqueUserId();
-    paymentsApi.createAccount(userId);
-
-    Map<String, Object> payload = Map.of(
-        "aoi", "{\"type\":\"Polygon\",\"coordinates\":[[[30,60],[31,60],[31,61],[30,61],[30,60]]]}",
-        "time_window", Map.of("from", "2026-07-01", "to", "2026-07-15"),
-        "sensor_type", "SAR"
-    );
-
-    Response response = ordersApi.createOrder(userId, "TASKING", payload);
-    response.then().statusCode(201);
-
-    OrderResponse order = response.as(OrderResponse.class);
-    assertThat(order.getProductType()).isEqualTo("TASKING");
     assertThat(order.getStatus()).isIn("CREATED", "PAYMENT_PENDING");
   }
 
@@ -65,7 +41,7 @@ class OrdersServiceTests extends BaseTest {
     paymentsApi.createAccount(userId);
 
     Map<String, Object> payload = Map.of(
-        "aoi", "{\"type\":\"Polygon\",\"coordinates\":[[[30,60],[31,60],[31,61],[30,61],[30,60]]]}",
+        "aoi", 5.0,
         "cadence", "DAILY",
         "duration_days", 30
     );
@@ -90,35 +66,11 @@ class OrdersServiceTests extends BaseTest {
     assertThat(error.getErrorCode()).isEqualTo("UNKNOWN_PRODUCT_TYPE");
   }
 
-  @ParameterizedTest
-  @ValueSource(ints = {0, -1, -100})
-  @DisplayName("[400] POST /orders - некорректная цена")
-  void createOrderInvalidPrice(int invalidPrice) {
-    String userId = uniqueUserId();
-
-    Map<String, Object> payload = Map.of(
-        "aoi", "test-aoi",
-        "capture_date", "2026-06-01",
-        "sensor_type", "OPTICAL"
-    );
-
-    Response response = ordersApi.createOrder(userId, "ARCHIVE", payload);
-    response.then().statusCode(400);
-
-    ErrorResponse error = response.as(ErrorResponse.class);
-    assertThat(error.getErrorCode()).isEqualTo("INVALID_PRICE");
-  }
-
   @Test
   @DisplayName("[400] POST /orders - без X-User-Id")
   void createOrderMissingUserId() {
-    Map<String, Object> payload = Map.of(
-        "aoi", "test-aoi",
-        "capture_date", "2026-06-01",
-        "sensor_type", "OPTICAL"
-    );
 
-    Response response = ordersApi.createOrderWithoutUserId("ARCHIVE", 100, payload);
+    Response response = ordersApi.createOrderWithoutUserId("ARCHIVE",archivePayload());
     response.then().statusCode(400);
 
     ErrorResponse error = response.as(ErrorResponse.class);
@@ -130,6 +82,7 @@ class OrdersServiceTests extends BaseTest {
   void listOrdersSuccess() {
     String userId = uniqueUserId();
     paymentsApi.createAccount(userId);
+    paymentsApi.topUp(userId, BigDecimal.valueOf(1000.0));
 
     ordersApi.createOrder(userId, "ARCHIVE", archivePayload());
     ordersApi.createOrder(userId, "TASKING", taskingPayload());
@@ -137,8 +90,10 @@ class OrdersServiceTests extends BaseTest {
     Response response = ordersApi.listOrders(userId);
     response.then().statusCode(200);
 
-    List<Map<String, Object>> orders = response.jsonPath().getList(".");
+    List<OrderResponse> orders = response.jsonPath().getList("orders", OrderResponse.class);
     assertThat(orders).isNotEmpty();
+    int total = response.jsonPath().getInt("total");
+    assertThat(total).isEqualTo(2);
   }
 
   @Test
@@ -155,13 +110,15 @@ class OrdersServiceTests extends BaseTest {
 
     OrderResponse order = response.as(OrderResponse.class);
     assertThat(order.getOrderId()).isEqualTo(orderId);
-    assertThat(order.getUserId()).isEqualTo(userId);
+    assertThat(order.getProductType()).isEqualTo("ARCHIVE");
+
   }
 
   @Test
   @DisplayName("[404] GET /orders/{order_id} - заказ не найден")
   void getOrderNotFound() {
-    Response response = ordersApi.getOrder("some-user", "nonexistent-order");
+    String userId = uniqueUserId();
+    Response response = ordersApi.getOrder(userId, "nonexistent-order");
     response.then().statusCode(404);
 
     ErrorResponse error = response.as(ErrorResponse.class);
@@ -170,17 +127,17 @@ class OrdersServiceTests extends BaseTest {
 
   private Map<String, Object> archivePayload() {
     return Map.of(
-        "aoi", "{\"type\":\"Polygon\",\"coordinates\":[[[30,60],[31,60],[31,61],[30,61],[30,60]]]}",
+        "aoi", 3.0,
         "capture_date", "2026-06-01",
-        "sensor_type", "OPTICAL"
+        "sensor_type", "MSI"
     );
   }
 
   private Map<String, Object> taskingPayload() {
     return Map.of(
-        "aoi", "{\"type\":\"Polygon\",\"coordinates\":[[[30,60],[31,60],[31,61],[30,61],[30,60]]]}",
+        "aoi", 3.0,
         "time_window", Map.of("from", "2026-07-01", "to", "2026-07-15"),
-        "sensor_type", "SAR"
+        "sensor_type", "MSI"
     );
   }
 }

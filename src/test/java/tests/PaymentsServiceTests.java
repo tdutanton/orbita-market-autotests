@@ -76,8 +76,6 @@ class PaymentsServiceTests extends BaseTest {
 
     Response topUpResponse = paymentsApi.topUp(userId, BigDecimal.valueOf(500.0));
     topUpResponse.then().statusCode(200);
-
-    Allure.addAttachment("response", topUpResponse.asPrettyString());
   }
 
   @Test

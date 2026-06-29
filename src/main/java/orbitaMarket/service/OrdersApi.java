@@ -26,17 +26,16 @@ public class OrdersApi {
         .response();
   }
 
-  public Response createOrderWithoutUserId(String productType, Integer price,
+  public Response createOrderWithoutUserId(String productType,
       Map<String, Object> payload) {
     return given()
         .contentType(ContentType.JSON)
         .body(Map.of(
             "product_type", productType,
-            "price", price,
             "payload", payload
         ))
         .when()
-        .post(BASE_PATH)
+        .post(BASE_PATH + "/orders")
         .then()
         .extract()
         .response();
@@ -47,7 +46,7 @@ public class OrdersApi {
         .contentType(ContentType.JSON)
         .header("X-User-Id", userId)
         .when()
-        .get(BASE_PATH)
+        .get(BASE_PATH + "/orders")
         .then()
         .extract()
         .response();
