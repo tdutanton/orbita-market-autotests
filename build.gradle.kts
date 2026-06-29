@@ -46,6 +46,9 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
 
     testImplementation("org.slf4j:slf4j-simple:2.0.13")
+
+    // для ожидания
+    testImplementation("org.awaitility:awaitility:4.2.0")
 }
 
 tasks.test {

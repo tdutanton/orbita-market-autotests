@@ -26,6 +26,24 @@ public class OrdersApi {
         .response();
   }
 
+  public Response createOrderWithId(String userId, String orderId, String productType,
+      Map<String, Object> payload) {
+    return given()
+        .contentType(ContentType.JSON)
+        .header("X-User-Id", userId)
+        .body(Map.of(
+            "orderId", orderId,
+            "productType", productType,
+            "payload", payload
+        ))
+        .when()
+        .post(BASE_PATH + "/orders")
+        .then()
+        .log().body()
+        .extract()
+        .response();
+  }
+
   public Response createOrderWithoutUserId(String productType,
       Map<String, Object> payload) {
     return given()
@@ -37,6 +55,7 @@ public class OrdersApi {
         .when()
         .post(BASE_PATH + "/orders")
         .then()
+        .log().body()
         .extract()
         .response();
   }
@@ -48,6 +67,7 @@ public class OrdersApi {
         .when()
         .get(BASE_PATH + "/orders")
         .then()
+        .log().body()
         .extract()
         .response();
   }
@@ -59,6 +79,7 @@ public class OrdersApi {
         .when()
         .get(BASE_PATH + "/{order_id}", orderId)
         .then()
+        .log().body()
         .extract()
         .response();
   }

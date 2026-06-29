@@ -3,7 +3,6 @@ package tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import base.BaseTest;
-import io.qameta.allure.Allure;
 import io.qameta.allure.Feature;
 import io.restassured.response.Response;
 import java.math.BigDecimal;
@@ -11,10 +10,9 @@ import java.util.List;
 import java.util.Map;
 import orbitaMarket.model.ErrorResponse;
 import orbitaMarket.model.OrderResponse;
+import orbitaMarket.model.PayloadRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 @Feature("Orders Service")
 class OrdersServiceTests extends BaseTest {
@@ -25,7 +23,7 @@ class OrdersServiceTests extends BaseTest {
     String userId = uniqueUserId();
     paymentsApi.createAccount(userId);
 
-    Response response = ordersApi.createOrder(userId, "ARCHIVE", archivePayload());
+    Response response = ordersApi.createOrder(userId, "ARCHIVE", PayloadRequest.archivePayload());
     response.then().statusCode(201);
 
     OrderResponse order = response.as(OrderResponse.class);
@@ -70,7 +68,8 @@ class OrdersServiceTests extends BaseTest {
   @DisplayName("[400] POST /orders - без X-User-Id")
   void createOrderMissingUserId() {
 
-    Response response = ordersApi.createOrderWithoutUserId("ARCHIVE",archivePayload());
+    Response response = ordersApi.createOrderWithoutUserId("ARCHIVE",
+        PayloadRequest.archivePayload());
     response.then().statusCode(400);
 
     ErrorResponse error = response.as(ErrorResponse.class);
@@ -84,8 +83,8 @@ class OrdersServiceTests extends BaseTest {
     paymentsApi.createAccount(userId);
     paymentsApi.topUp(userId, BigDecimal.valueOf(1000.0));
 
-    ordersApi.createOrder(userId, "ARCHIVE", archivePayload());
-    ordersApi.createOrder(userId, "TASKING", taskingPayload());
+    ordersApi.createOrder(userId, "ARCHIVE", PayloadRequest.archivePayload());
+    ordersApi.createOrder(userId, "TASKING", PayloadRequest.taskingPayload());
 
     Response response = ordersApi.listOrders(userId);
     response.then().statusCode(200);
@@ -102,7 +101,7 @@ class OrdersServiceTests extends BaseTest {
     String userId = uniqueUserId();
     paymentsApi.createAccount(userId);
 
-    Response created = ordersApi.createOrder(userId, "ARCHIVE", archivePayload());
+    Response created = ordersApi.createOrder(userId, "ARCHIVE", PayloadRequest.archivePayload());
     String orderId = created.jsonPath().getString("order_id");
 
     Response response = ordersApi.getOrder(userId, orderId);
@@ -123,21 +122,5 @@ class OrdersServiceTests extends BaseTest {
 
     ErrorResponse error = response.as(ErrorResponse.class);
     assertThat(error.getErrorCode()).isEqualTo("ORDER_NOT_FOUND");
-  }
-
-  private Map<String, Object> archivePayload() {
-    return Map.of(
-        "aoi", 3.0,
-        "capture_date", "2026-06-01",
-        "sensor_type", "MSI"
-    );
-  }
-
-  private Map<String, Object> taskingPayload() {
-    return Map.of(
-        "aoi", 3.0,
-        "time_window", Map.of("from", "2026-07-01", "to", "2026-07-15"),
-        "sensor_type", "MSI"
-    );
   }
 }

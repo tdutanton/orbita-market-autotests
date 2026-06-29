@@ -1,6 +1,7 @@
 package orbitaMarket.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,5 +12,5 @@ public class BalanceResponse {
 
   private String userId;
 
-  private Integer balance;
+  private BigDecimal balance;
 }

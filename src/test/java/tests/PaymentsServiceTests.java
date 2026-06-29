@@ -3,7 +3,6 @@ package tests;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import base.BaseTest;
-import io.qameta.allure.Allure;
 import io.qameta.allure.Feature;
 import io.restassured.response.Response;
 import java.math.BigDecimal;
@@ -136,7 +135,7 @@ class PaymentsServiceTests extends BaseTest {
 
     BalanceResponse balance = response.as(BalanceResponse.class);
     assertThat(balance.getUserId()).isEqualTo(userId);
-    assertThat(balance.getBalance()).isEqualTo(300);
+    assertThat(balance.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(300));
   }
 
   @Test
@@ -171,6 +170,6 @@ class PaymentsServiceTests extends BaseTest {
 
     Response response = paymentsApi.getBalance(userId);
     BalanceResponse balance = response.as(BalanceResponse.class);
-    assertThat(balance.getBalance()).isEqualTo(600);
+    assertThat(balance.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(600));
   }
 }
