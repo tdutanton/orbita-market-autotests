@@ -75,3 +75,14 @@ tasks.register("testAndReport") {
     dependsOn(tasks.test)
     finalizedBy(tasks.allureServe)
 }
+
+tasks.register("cleanAndTest") {
+    dependsOn(tasks.clean)
+    finalizedBy(tasks.test)
+}
+
+tasks.register("cleanAndTestAndReport") {
+    dependsOn(tasks.clean)
+    dependsOn(tasks.test)
+    finalizedBy(tasks.allureServe)
+}

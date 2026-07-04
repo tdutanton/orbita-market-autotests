@@ -51,7 +51,7 @@ gradlew test
 Или
 
 ```bash
-gradlew clean test
+gradlew cleanAndTest
 ```
 
 для повторного запуска (в случае появления сообщения "Test events were not received" из-за
@@ -67,7 +67,7 @@ gradlew allureServe
 build.gradle.kts):
 
 ```bash
-gradlew testAndReport
+gradlew cleanAndTestAndReport
 ```
 
 ## Allure отчет

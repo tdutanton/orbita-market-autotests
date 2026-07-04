@@ -120,7 +120,7 @@ class PaymentsServiceTests extends BaseTest {
     paymentsApi.createAccount(userId).then().statusCode(201);
 
     Response response = paymentsApi.topUpWithInvalidBody(userId, Map.of("amount", "abc"));
-    response.then().statusCode(500);
+    response.then().statusCode(400);
   }
 
   @Test
