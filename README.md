@@ -42,16 +42,18 @@ docker compose up -d
 
 2. Запустить тесты в этом репозитории:
 
+*Удобнее запускать через IDE*
+
 Только тесты:
 
 ```bash
-gradlew test
+gradle test
 ```
 
 Или
 
 ```bash
-gradlew cleanAndTest
+gradle cleanAndTest
 ```
 
 для повторного запуска (в случае появления сообщения "Test events were not received" из-за
@@ -60,14 +62,23 @@ gradlew cleanAndTest
 Allure отчет:
 
 ```bash
-gradlew allureServe
+gradle allureServe
 ```
 
 Запустить сразу и тесты и открытие Allure отчета (пользовательская цель сборки добавлена в
 build.gradle.kts):
 
 ```bash
-gradlew cleanAndTestAndReport
+gradle cleanAndTestAndReport
+```
+
+Если возникают ошибки при запуске команд - попробуйте запуск через **./gradlew ...** (для создания
+gradlew - **gradle wrapper --gradle-version 8.5**).
+
+Чтобы увидеть возможные цели для сборки (в случае конфликтов с gradle):
+
+```bash
+gradle -b build.gradle.kts tasks --all
 ```
 
 ## Allure отчет
