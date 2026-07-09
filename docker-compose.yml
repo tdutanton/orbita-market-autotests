@@ -1,0 +1,18 @@
+services:
+  tests:
+    build:
+      context: .
+    image: orbita-market-tests
+    container_name: orbita-market-tests
+    environment:
+      - TASK=${TASK:-cleanAndTest}
+      - BASE_URL=${BASE_URL:-http://api-gateway:8080}
+    volumes:
+      - ./test-reports:/app/test-reports
+    networks:
+      - orbita-market-net
+
+networks:
+  orbita-market-net:
+    external: true
+    name: orbita-market-net

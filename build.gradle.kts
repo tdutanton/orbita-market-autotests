@@ -71,18 +71,33 @@ allure {
     version.set(allureVersion)
 }
 
+tasks.test {
+    mustRunAfter(tasks.clean)
+}
+
+tasks.allureReport {
+    mustRunAfter(tasks.test)
+}
+
+tasks.allureServe {
+    mustRunAfter(tasks.test)
+}
+
 tasks.register("testAndReport") {
     dependsOn(tasks.test)
     finalizedBy(tasks.allureServe)
 }
 
 tasks.register("cleanAndTest") {
-    dependsOn(tasks.clean)
-    finalizedBy(tasks.test)
+    dependsOn(tasks.clean, tasks.test)
+}
+
+tasks.register("cleanTestReports") {
+    doLast {
+        delete("test-reports")
+    }
 }
 
 tasks.register("cleanAndTestAndReport") {
-    dependsOn(tasks.clean)
-    dependsOn(tasks.test)
-    finalizedBy(tasks.allureServe)
+    dependsOn(tasks.clean, tasks.test, tasks.allureServe)
 }
